@@ -3,16 +3,17 @@ process.env.NODE_ENV == 'prod'
   ? dotenv.config({ path: './.env.prod' })
   : dotenv.config({ path: './.env.local' });
 import express, { json } from 'express';
-import mongoose, { connect, isValidObjectId } from 'mongoose';
+import mongoose, { connect } from 'mongoose';
 
 //라우터
 import { userRouter } from './routes/userRoute.js';
+import { blogRouter } from './routes/blogRoute.js';
 
 const app = express();
 
-//Database 설정 
+//Database 설정
 let mongodbConnection = await connect(process.env.MONGO_URI);
-mongoose.set('debug',true);
+mongoose.set('debug', true);
 
 if (mongodbConnection) {
   console.log('MongoDB connected');
@@ -20,9 +21,8 @@ if (mongodbConnection) {
 
 //body-parse 역할
 app.use(json());
-app.use('/user',userRouter);
-
-
+app.use('/user', userRouter);
+app.use('/blog', blogRouter);
 
 app.listen(4000, () => {
   console.log('server listeing on port 4000');
