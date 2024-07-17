@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import { checkSchema } from 'express-validator';
 import { isValidObjectId } from 'mongoose';
-import { User, Blog } from '../models/index.js';
+import { User, Blog, Comment } from '../models/index.js';
 
 export const blogRouter = Router();
 
@@ -63,7 +63,13 @@ blogRouter.post('/', async (req, res) => {
 
 blogRouter.get('/', async (req, res) => {
   try {
-    const blogs = await Blog.find();
+    const blogs = await Blog.find({})
+      .limit(10)
+      .populate([
+        { path: 'user' },
+        { path: 'comments', populate: { path: 'user' } },
+      ]);
+
     return res.send({ blogs });
   } catch (error) {
     console.error(error);

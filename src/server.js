@@ -5,6 +5,7 @@ process.env.NODE_ENV == 'prod'
 import express, { json } from 'express';
 import mongoose, { connect } from 'mongoose';
 import { blogRouter, commentRouter, userRouter } from './routes/index.js';
+import { generateFakeData } from './faker.js';
 
 const app = express();
 
@@ -14,6 +15,7 @@ mongoose.set('debug', true);
 
 if (mongodbConnection) {
   console.log('MongoDB connected');
+  //await generateFakeData(20, 5, 30);
 }
 
 //body-parse 역할
