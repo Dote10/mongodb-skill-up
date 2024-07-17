@@ -7,7 +7,7 @@ const BlogSchema = new Schema(
     isLive: { type: Boolean, require: true, default: false },
     user: { type: Types.ObjectId, required: true, ref: 'user' },
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
 export const Blog = model('blog', BlogSchema);

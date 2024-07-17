@@ -1,72 +1,70 @@
 import { Router } from 'express';
-import { Blog } from '../models/Blog.js';
 import { checkSchema } from 'express-validator';
 import { isValidObjectId } from 'mongoose';
-import { User } from '../models/User.js';
+import { User, Blog } from '../models/index.js';
 
 export const blogRouter = Router();
 
 blogRouter.post('/', async (req, res) => {
+  const validationResult = await checkSchema(
+    {
+      title: {
+        notEmpty: { errorMessage: 'title이 값이 오지 않았습니다.' },
+        isString: { errorMessage: 'title은 문자열이어야 합니다.' },
+      },
+      content: {
+        notEmpty: { errorMessage: 'content이 값이 오지 않았습니다.' },
+        isString: { errorMessage: 'content는 문자열이어야 합니다.' },
+      },
+      isLive: {
+        notEmpty: { errorMessage: 'isLive이 값이 오지 않았습니다.' },
+        isBoolean: { errorMessage: 'title은 boolean 타입이어야 합니다.' },
+      },
+      userId: {
+        notEmpty: { errorMessage: 'user이 값이 오지 않았습니다.' },
+      },
+    },
+    ['body'],
+  ).run(req);
 
-    const validationResult = await checkSchema({
-        title:{
-            notEmpty:{errorMessage: 'title이 값이 오지 않았습니다.'},
-            isString:{errorMessage: 'title은 문자열이어야 합니다.'}
-        },
-        content:{
-            notEmpty:{errorMessage: 'content이 값이 오지 않았습니다.'},
-            isString:{errorMessage: 'content는 문자열이어야 합니다.'}
-        },
-        isLive:{
-            notEmpty:{errorMessage: 'isLive이 값이 오지 않았습니다.'},
-            isBoolean:{errorMessage: 'title은 boolean 타입이어야 합니다.'}
-        },
-        userId:{
-            notEmpty:{errorMessage: 'user이 값이 오지 않았습니다.'},
-        }
+  const validationError = validationResult
+    .filter((err) => err.errors.length > 0)
+    .map((err) => err.errors[0]);
 
-    },['body']).run(req);
+  if (validationError.length > 0) {
+    return res.status(400).send({ err: validationError });
+  }
 
+  const { userId } = req.body;
 
-     
-    const validationError = validationResult.filter(err => err.errors.length > 0).map(err => err.errors[0]); 
+  if (!isValidObjectId(userId)) {
+    return res.status(400).send({ err: 'Invaliad UserId' });
+  }
 
-
-    if(validationError.length > 0){
-        return res.status(400).send({err:validationError});
-    }
-
-    const {userId} = req.body;
-
-    if(!isValidObjectId(userId)){
-        return res.status(400).send({err:'Invaliad UserId'});
-    }
-
-
-    try {
+  try {
     //실제 존재하는 User인지 조회
     const user = await User.findById(userId);
 
-    if(!user){
-        return res.status(400).send({err:'존재하지 않는 user의 userId 입니다.'});
+    if (!user) {
+      return res
+        .status(400)
+        .send({ err: '존재하지 않는 user의 userId 입니다.' });
     }
 
-    let blog = new Blog({...req.body,user});
+    let blog = new Blog({ ...req.body, user });
     await blog.save();
 
-    return res.send({blog});   
-        
-    } catch (error) {
-      console.error(error);
-      res.status(500).send({ err: error.message });
-    }
+    return res.send({ blog });
+  } catch (error) {
+    console.error(error);
+    res.status(500).send({ err: error.message });
   }
-);
+});
 
 blogRouter.get('/', async (req, res) => {
   try {
     const blogs = await Blog.find();
-    return res.send({blogs});
+    return res.send({ blogs });
   } catch (error) {
     console.error(error);
     return res.status(500).send({ err: error.message });
@@ -74,13 +72,15 @@ blogRouter.get('/', async (req, res) => {
 });
 
 blogRouter.get('/:blogId', async (req, res) => {
-    const { blogId } = req.params;
-    if(!isValidObjectId(blogId)){
-        return res.status(400).send({'err':'요청하신 블로그id는 유효하지 않습니다.'});
-    }
-    try {
-        const blog = await Blog.findById(blogId);
-        return res.send({blog});
+  const { blogId } = req.params;
+  if (!isValidObjectId(blogId)) {
+    return res
+      .status(400)
+      .send({ err: '요청하신 블로그id는 유효하지 않습니다.' });
+  }
+  try {
+    const blog = await Blog.findById(blogId);
+    return res.send({ blog });
   } catch (error) {
     console.error(error);
     return res.status(500).send({ err: error.message });
@@ -88,46 +88,47 @@ blogRouter.get('/:blogId', async (req, res) => {
 });
 
 blogRouter.put('/:blogId', async (req, res) => {
+  const validationResult = await checkSchema(
+    {
+      title: {
+        notEmpty: { errorMessage: 'title이 값이 오지 않았습니다.' },
+        isString: { errorMessage: 'title은 문자열이어야 합니다.' },
+      },
+      content: {
+        notEmpty: { errorMessage: 'content이 값이 오지 않았습니다.' },
+        isString: { errorMessage: 'content는 문자열이어야 합니다.' },
+      },
+      isLive: {
+        notEmpty: { errorMessage: 'isLive이 값이 오지 않았습니다.' },
+        isBoolean: { errorMessage: 'isLive은 boolean 타입이어야 합니다.' },
+      },
+    },
+    ['body'],
+  ).run(req);
 
-    const validationResult = await checkSchema({
-        title:{
-            notEmpty:{ errorMessage: 'title이 값이 오지 않았습니다.'},
-            isString:{ errorMessage: 'title은 문자열이어야 합니다.'},
-        },
-        content:{
-            notEmpty:{ errorMessage: 'content이 값이 오지 않았습니다.'},
-            isString:{ errorMessage: 'content는 문자열이어야 합니다.'},
-        },
-        isLive:{
-            notEmpty:{errorMessage: 'isLive이 값이 오지 않았습니다.'},
-            isBoolean:{errorMessage: 'isLive은 boolean 타입이어야 합니다.'},
-        }
+  const validationError = validationResult
+    .filter((err) => err.errors.length > 0)
+    .map((err) => err.errors[0]);
 
-    },['body']).run(req);
+  if (validationError.length > 0) {
+    return res.status(400).send({ err: validationError });
+  }
 
+  const { blogId } = req.params;
 
-     const validationError = validationResult.filter(err => err.errors.length > 0).map(err => err.errors[0]); 
+  if (!isValidObjectId(blogId)) {
+    return res.status(400).send({ err: '유효한 블로그ID가 아닙니다.' });
+  }
+  try {
+    const blog = await Blog.findByIdAndUpdate(blogId, req.body, { new: true });
 
-
-    if(validationError.length > 0){
-        return res.status(400).send({err:validationError});
+    if (!blog) {
+      return res
+        .status(400)
+        .send({ err: '해당 블로그ID의 블로그가 존재하지 않습니다.' });
     }
 
-    const {blogId} = req.params;
-
-    if(!(isValidObjectId(blogId))){
-        return res.status(400).send({'err':'유효한 블로그ID가 아닙니다.'});
-    }
-    try {
-    
-    const blog = await Blog.findByIdAndUpdate(blogId,req.body,{new : true});
-
-    if(!blog){
-        return res.status(400).send({'err':'해당 블로그ID의 블로그가 존재하지 않습니다.'});
-    }
-
-    return res.send({blog});
-
+    return res.send({ blog });
   } catch (error) {
     console.error(error);
     return res.status(500).send({ err: error.message });
@@ -135,27 +136,27 @@ blogRouter.put('/:blogId', async (req, res) => {
 });
 
 blogRouter.patch('/:blogId/live', async (req, res) => {
-    const [validationError] = await checkSchema({
-        isLive:{
-            notEmpty:{errorMessage: 'isLive이 값이 오지 않았습니다.'},
-            isBoolean:{errorMessage: 'title은 boolean 타입이어야 합니다.'}
-        }   
-    }).run(req);
+  const [validationError] = await checkSchema({
+    isLive: {
+      notEmpty: { errorMessage: 'isLive이 값이 오지 않았습니다.' },
+      isBoolean: { errorMessage: 'title은 boolean 타입이어야 합니다.' },
+    },
+  }).run(req);
 
-    if(validationError.errors.length > 0 ){
-        console.log(validationError);
-        return res.status(400).send({err:validationError.array()});
-    }
+  if (validationError.errors.length > 0) {
+    console.log(validationError);
+    return res.status(400).send({ err: validationError.array() });
+  }
 
-    const {blogId} = req.params;
+  const { blogId } = req.params;
 
-    if(!(isValidObjectId(blogId))){
-        return res.status(400).send({'err':'유효한 블로그ID가 아닙니다.'});
-    }
+  if (!isValidObjectId(blogId)) {
+    return res.status(400).send({ err: '유효한 블로그ID가 아닙니다.' });
+  }
 
   try {
-    const blog = await Blog.findByIdAndUpdate(blogId,req.body,{new : true});
-    return res.send({blog});
+    const blog = await Blog.findByIdAndUpdate(blogId, req.body, { new: true });
+    return res.send({ blog });
   } catch (error) {
     console.error(error);
     return res.status(500).send({ err: error.message });

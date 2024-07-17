@@ -11,7 +11,7 @@ const UserSchema = new Schema(
     age: Number,
     email: String,
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
 //mongoose에 모델 등록

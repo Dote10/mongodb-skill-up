@@ -4,10 +4,7 @@ process.env.NODE_ENV == 'prod'
   : dotenv.config({ path: './.env.local' });
 import express, { json } from 'express';
 import mongoose, { connect } from 'mongoose';
-
-//라우터
-import { userRouter } from './routes/userRoute.js';
-import { blogRouter } from './routes/blogRoute.js';
+import { blogRouter, commentRouter, userRouter } from './routes/index.js';
 
 const app = express();
 
@@ -23,6 +20,7 @@ if (mongodbConnection) {
 app.use(json());
 app.use('/user', userRouter);
 app.use('/blog', blogRouter);
+app.use('/blog/:blogId/comment', commentRouter);
 
 app.listen(4000, () => {
   console.log('server listeing on port 4000');
