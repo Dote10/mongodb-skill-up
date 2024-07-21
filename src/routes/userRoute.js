@@ -2,6 +2,7 @@ import { Router } from 'express';
 import { body, validationResult } from 'express-validator';
 import { User } from '../models/index.js';
 import { isValidObjectId } from 'mongoose';
+import { createUser } from '../controllers/userController.js';
 
 //userRouter 인스턴스만들기
 export const userRouter = Router();
@@ -9,15 +10,7 @@ export const userRouter = Router();
 /**
  * GET - 모든 user 반환
  */
-userRouter.get('/', async (req, res) => {
-  try {
-    const users = await User.find({});
-    return res.send({ users });
-  } catch (error) {
-    console.log(error);
-    return res.status(500).send({ err: error.message });
-  }
-});
+userRouter.get('/', createUser);
 
 /**
  * GET - param userId에 해당하는 user 반환

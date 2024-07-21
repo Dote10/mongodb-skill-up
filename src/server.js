@@ -5,7 +5,8 @@ process.env.NODE_ENV == 'prod'
 import express, { json } from 'express';
 import mongoose, { connect } from 'mongoose';
 import { blogRouter, commentRouter, userRouter } from './routes/index.js';
-import { generateFakeData } from './faker.js';
+//import { generateFakeData } from './fakerUsingModel.js';
+//import { generateFakeData } from './faker.js';
 
 const app = express();
 
@@ -15,7 +16,6 @@ mongoose.set('debug', true);
 
 if (mongodbConnection) {
   console.log('MongoDB connected');
-  //await generateFakeData(20, 5, 30);
 }
 
 //body-parse 역할
@@ -24,6 +24,9 @@ app.use('/user', userRouter);
 app.use('/blog', blogRouter);
 app.use('/blog/:blogId/comment', commentRouter);
 
-app.listen(4000, () => {
+app.listen(4000, async () => {
   console.log('server listeing on port 4000');
+  // for (let i = 0; i < 20; i++) {
+  //   await generateFakeData(10, 1, 10);
+  // }
 });
