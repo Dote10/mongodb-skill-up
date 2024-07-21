@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import {
   createComment,
+  deleteComment,
   findAllComment,
   updateComment,
 } from '../controllers/commentController.js';
@@ -17,3 +18,5 @@ commentRouter.post('/', createComment);
 commentRouter.get('/', findAllComment);
 
 commentRouter.patch('/:commentId', updateComment);
+
+commentRouter.delete('/:commentId', deleteComment);

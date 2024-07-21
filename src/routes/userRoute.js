@@ -2,7 +2,7 @@ import { Router } from 'express';
 import { body, validationResult } from 'express-validator';
 import { User } from '../models/index.js';
 import { isValidObjectId } from 'mongoose';
-import { createUser } from '../controllers/userController.js';
+import { createUser, updateUser } from '../controllers/userController.js';
 
 //userRouter 인스턴스만들기
 export const userRouter = Router();
@@ -85,35 +85,7 @@ userRouter.patch(
     body('name').notEmpty().withMessage('name이 비어있습니다.'),
     body('age').notEmpty().withMessage('age가 비어있습니다.'),
   ],
-  async (req, res) => {
-    const { userId } = req.params;
-
-    if (!isValidObjectId(userId)) {
-      return res.status(400).send({ err: 'Invalid userId' });
-    }
-
-    const validationError = validationResult(req);
-
-    if (validationError.errors.length > 0) {
-      return res.status(400).send({ err: validationError.array() });
-    }
-
-    try {
-      const { name, age } = req.body;
-
-      let user = await User.findById(userId);
-      if (age) user.age = age;
-      if (name) user.name = name;
-
-      //실제적으로 updateOne()이 호출된다.
-      const updateUser = await user.save();
-
-      return res.send({ user: updateUser });
-    } catch (error) {
-      console.log(error);
-      return res.status(500).send({ err: error.message });
-    }
-  },
+  updateUser,
 );
 
 /**

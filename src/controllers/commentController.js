@@ -125,3 +125,28 @@ export const updateComment = async (req, res) => {
     return res.status(500).send({ err: error.massage });
   }
 };
+
+export const deleteComment = async (req, res) => {
+  const { commentId } = req.params;
+
+  if (!isValidObjectId(commentId)) {
+    return res
+      .status(400)
+      .send({ err: '유효한 형식의 comment id가 아닙니다.' });
+  }
+
+  try {
+    const [comment] = await Promise.all([
+      Comment.findOneAndDelete({ _id: commentId }),
+      Blog.updateOne(
+        { 'comment._id': commentId },
+        { $pull: { comments: { _id: commentId } } },
+      ),
+    ]);
+
+    return res.send(comment);
+  } catch (error) {
+    console.error(error);
+    return res.status(500).send({ err: error.message });
+  }
+};
